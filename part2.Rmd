@@ -1,0 +1,191 @@
+---
+title: "Project 2.2"
+author: "Truc Le"
+date: "3/1/2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(summarytools)
+library(dplyr)
+library(coin)
+library(ggpubr)
+setwd("/Users/trucle/Desktop")
+covidB <- read.csv("CovidB.csv")
+covidB$Age_Group <-as.factor(covidB$Age_Group)
+
+minor <- subset(covidB, Age_Group == "0-17 years")
+Y_adult <- subset(covidB, Age_Group == "45-54 years")
+elderly <- subset(covidB, Age_Group == "75-84 years")
+
+data <- rbind(minor, Y_adult, elderly)
+
+ duptimes <- c( 6,1,7,9,13,6,11,6,18,11,8,8,9,4,6,7,13,11,14,11,15,8,0,2,375,145,2252,926,1179,527,757,381,1305,680,1123,590,625,343,667,336,1214,661,2475,1276,2332,1254,491,253,1105,795,9791,7833,5148,4617,2317,2158,4568,3453,4460,3577,2916,2304,3923,3076,8749,6427,15263,11571,13872,10493,3014,2158)
+ 
+ idx <- rep(1:nrow(data), duptimes)
+ 
+ dupdf <- data[idx,]
+ 
+ data_new <-dupdf[3:4]
+```
+
+#1 Introduction 
+
+
+
+#2 Summary Analysis
+
+```{r, echo=FALSE}
+plot(Death~Age_Group, data=data)
+
+par(mfrow=c(2,2))
+
+a<-ggplot(data, aes(x = Age_Group, y = Death))+
+  theme_bw()+
+  geom_bar(stat = "identity")+
+  ggtitle("Barplot for Death Counts by Age Groups")+
+  xlab("Age Group")+
+  ylab("Death Counts")
+
+b<-ggplot(data, aes(x = Sex, y = Death))+
+  theme_bw()+
+  geom_bar(stat = "identity")+
+  ggtitle("Barplot for Death Counts by Gender")+
+  xlab("Gender")+
+  ylab("Death Counts")
+
+c<-ggplot(data, aes(x = Age_Group, y = Death))+
+  theme_bw()+
+  geom_boxplot()+
+  ggtitle("Boxplot for Death Counts by Age Groups")+
+  xlab("Age Group")+
+  ylab("Death Counts")
+
+d<-ggplot(data, aes(x = Sex, y = Death))+
+  theme_bw()+
+  geom_boxplot()+
+  ggtitle("Boxplot for Death Counts by Gender")+
+  xlab("Gender")+
+  ylab("Death Counts")
+
+text <- paste("Figure 1: From the bar graphs and boxplots, it can be observe that the death counts are the highest in the age group of 75-85 years and in the male population", sep = " ")
+text.p <- ggparagraph(text = text, face = "italic", size = 11, color = "black")
+
+ggarrange(a, b, c, d, text.p, 
+          labels = c("A", "B", "C","D"),
+          ncol = 2, nrow = 3)
+
+# with(data, tapply(Death, Age_Group, mean))
+# with(data, tapply(Death, Age_Group, median))
+# with(data, tapply(Death, Age_Group, sd))
+# with(data, tapply(Death, Age_Group, min))
+# with(data, tapply(Death, Age_Group, max))
+# with(data, tapply(Death, Age_Group, sum))
+# 
+with(data, tapply(Death, Sex, mean))
+with(data, tapply(Death, Sex, median))
+with(data, tapply(Death, Sex, sd))
+with(data, tapply(Death, Sex, min))
+with(data, tapply(Death, Sex, max))
+with(data, tapply(Death, Sex, sum))
+```
+
+###Statistical Summary Table 
+
+| Death Counts by: | 0-17 years | 45-54 years | 75-84 years | Female   | Male     |
+|------------------|------------|-------------|-------------|----------|----------|
+| Mean             | 8.50000    | 923.62500   | 5564.66667  | 1830.056 | 2501.139 |
+| Median           | 8.0        | 673.5       | 4191.5      | 558.5    | 1114.0   |
+| Std Dev          | 4.423259   | 653.541377  | 4058.287448 | 2941.454 | 3793.517 |
+| Min              | 0          | 145         | 759         | 1        | 0        |
+| Max              | 18         | 2475        | 15263       | 11571    | 15263    |
+| total            | 204        | 22167       | 133552      | 65882    | 90041    |
+Table 1: From this sample, it is observed that the age group of 75-84 years have the highest mortality rate from Covid-19
+
+
+#3 Analysis
+
+```{r, echo=FALSE}
+data_table<-xtabs(Death ~ Sex + Age_Group, data = data,  drop.unused.levels = TRUE)
+ni. = rowSums(data_table)
+n.j = colSums(data_table)
+
+#class(data_table)
+```
+
+Hypothesis:
+
+$H_O:$ Age Group and Genders are indepedent variables regarding Death involving Covid-19.
+
+$H_A:$ Age Group and Genders are not indepedent variables regarding Death involving Covid-19.
+
+
+###Contingency Table
+|        | Age Group  |             |             |             
+|--------|------------|-------------|-------------|
+| Sex    | 0-17 years | 45-54 years | 75-84 years |
+| Female | 84         | 7372        | 58426       |
+| Male   | 120        | 14795       | 75126       |
+Table 2: It is observed that there is a higher mortality rate in the male population for each Age Group.
+
+
+
+```{r, echo=FALSE}
+the.test = chisq.test(data_table,correct = FALSE)
+eij = the.test$expected
+chi.sq.obs = as.numeric(the.test$statistic)
+```
+
+```{r, echo=FALSE}
+#Permutation P-value
+R = 4000
+r.perms = sapply(1:R,function(i){
+  perm.data = data
+  perm.data$Age_Group = sample(perm.data$Age_Group,nrow(perm.data),replace = FALSE)
+  chi.sq.i = chisq.test(xtabs(Death~Sex+ Age_Group, data=perm.data, drop.unused.levels = TRUE),correct = FALSE)$stat
+  return(chi.sq.i)
+})
+perm.pval = mean(chi.sq.i >= chi.sq.obs)
+```
+
+
+P( 0-17 years | Female) - P( 0-17 years | Male)
+P(18-29 years | Female) - P(18-29 years | Male)
+P(45-54 years | Female) - P(45-54 years | Male)
+P(75-84 years | Female) - P(75-84 years | Male)
+
+```{r, echo=FALSE}
+#Pairwise comparisons
+
+n = sum(data_table)
+ni. = rowSums(data_table)
+n.j = colSums(data_table)
+all.pjG1 = data_table[1,]/ni.[1] #all conditional probabilites for row 1
+all.pjG2= data_table[2,]/ni.[2] #all conditional probabilites for row 2
+all.pbar = n.j/n #all probabilities regardless of group
+all.Zij = c(all.pjG1 - all.pjG2)/sqrt(all.pbar*(1-all.pbar)*(1/ni.[1] + 1/ni.[2])) #The z-test-statistics
+
+r.perms.cutoff = sapply(1:R,function(i){
+  perm.data = data
+  perm.data$Sex = sample(perm.data$Sex,nrow(perm.data),replace = FALSE)
+  row.sum = rowSums(xtabs(Death~Sex+ Age_Group, data=perm.data, drop.unused.levels = TRUE))
+  col.sum = colSums(xtabs(Death~Sex+ Age_Group, data=perm.data, drop.unused.levels = TRUE))
+  all.pji = xtabs(Death~Sex+ Age_Group, data=perm.data, drop.unused.levels = TRUE)[1,]/row.sum[1]
+  all.pji.= xtabs(Death~Sex+ Age_Group, data=perm.data, drop.unused.levels = TRUE)[2,]/row.sum[2]
+  all.pbar = col.sum/sum(row.sum)
+  all.Zij = c(all.pji - all.pji.)/sqrt(all.pbar*(1-all.pbar)*(1/row.sum[1] + 1/row.sum[2]))
+  Q.r = max(abs(all.Zij))
+  return(Q.r)
+})
+alpha = 0.05
+cutoff.q = as.numeric(quantile(21.55774,(1-alpha)))
+
+
+
+all.Zij = matrix(all.Zij,nrow=  1)
+colnames(all.Zij) = c("0-17 years","45-54 years", "75-84 years")
+rownames(all.Zij) = c("Female vs. Male")
+all.Zij
+```

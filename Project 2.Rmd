@@ -1,0 +1,304 @@
+---
+title: "Project 2"
+author: "Truc Le"
+date: "2/27/2021"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(summarytools)
+library(dplyr)
+library(coin)
+library(ggpubr)
+library(coin)
+setwd("/Users/trucle/Desktop")
+covidA <- read.csv("CovidA.csv")
+
+
+covidA_Data_Maryland<- subset(covidA, State == "Maryland")
+covidA_Data_California<-filter(covidA, State == "California")
+covidA_Data_Hawaii <- filter(covidA, State =="Hawaii")
+covidA_Data_Mississippi <- filter(covidA, State == "Mississippi")
+covidA_subset<- rbind(covidA_Data_Maryland, covidA_Data_California, covidA_Data_Hawaii, covidA_Data_Mississippi)
+#Subsetting the data into the 4 chosen states
+```
+
+#1 Introduction
+
+This report address the question of whether the different states have an affect on the death caused by Covid-19, due to the different regulations and infrasctructure each state has in implementing preventative measures against the widespread of Covid-19. In this report, four states are chosen for the analysis: Maryland, California, Hawaii, and Mississippi, giving us a diverse insight on how the death rate caused by Covid-19 differs based on the states individuals reside in. Maryland and Mississippi were chosen due to their economic standing among the 50 states, with Maryland being the wealthiest state and Mississippi being the poorest state. It would be interesting to observe whether the economic differences affect the states ability to adequately handle the widespread of Covid-19, and therefore, the death rate by the disease within their states. In addition, Hawaii was chosen for its geological location and physicality, it is made up of multiple islands detached from the mainland of the North American continent. Hawaii is an ideal state to observe whether travel and tourism regulations have an affect on the spread of Covid-19, and subsequently, the death rate by the disease among the Hawaiian people. Lastly, California was chosen due to its massive size and densely populated area that make them suitable Covid-19 hot spots. The report will based its analysis on comparing the recorded number of deaths by Covid-19 from these four states: Maryland, California, Hawaii, and Mississippi. In this report, K sample method will be used to observe if there is signficant statistical evidence that states have an affect on the numbers of deaths caused by Covid-19 due to the different regulations and infrastrcture put in place by each state. 
+
+#2 Summary of Data
+
+This report utilize a subset of data taken from the original list of 50 states and their recorded numbers of deaths based on different months from the year 2020 into the year 2021. Four states were chosen for observation based on the criteria they met, size, economic standing, and location. Data about the nunmber of deaths were recorded fromm the four states within the last year, irrespective of the months the data were taken from.
+
+```{r, echo=FALSE, fig.height=3, fig.width=9}
+boxplot = ggplot(covidA_subset, aes(x=Death, fill=State))+
+  geom_boxplot()+ggtitle("Distribution of Deaths by State") +
+  labs(caption = "Figure.1a The boxplot indicates that California has the highest number of death by Covid-19 and Hawaii having the lowest recorded number of deaths.") +
+  theme(plot.caption = element_text(hjust = 0.2), axis.text.y = element_blank())
+
+boxplot
+```
+
+```{r, echo=FALSE}
+ML_avg = mean(covidA_Data_Maryland$Death)
+ML_sd = sd(covidA_Data_Maryland$Death)
+ML_min = min(covidA_Data_Maryland$Death)
+ML_max = max(covidA_Data_Maryland$Death)
+ML_med = median(covidA_Data_Maryland$Death)
+
+
+```
+
+```{r, echo=FALSE}
+CAL_avg = mean(covidA_Data_California$Death)
+CAL_sd = sd(covidA_Data_California$Death)
+CAL_min = min(covidA_Data_California$Death)
+CAL_max = max(covidA_Data_California$Death)
+CAL_med = median(covidA_Data_California$Death)
+
+```
+
+```{r, echo=FALSE}
+HA_avg = mean(covidA_Data_Hawaii$Death)
+HA_sd = sd(covidA_Data_Hawaii$Death)
+HA_min = min(covidA_Data_Hawaii$Death)
+HA_max = max(covidA_Data_Hawaii$Death)
+HA_med = median(covidA_Data_Hawaii$Death)
+
+```
+
+```{r, echo=FALSE}
+MIS_avg = mean(covidA_Data_Mississippi$Death)
+MIS_sd = sd(covidA_Data_Mississippi$Death)
+MIS_min = min(covidA_Data_Mississippi$Death)
+MIS_max = max(covidA_Data_Mississippi$Death)
+MIS_med = median(covidA_Data_Mississippi$Death)
+
+```
+
+```{r, echo=FALSE}
+death_avg = mean(covidA_subset$Death)
+death_sd = sd(covidA_subset$Death)
+death_min = min(covidA_subset$Death)
+death_max = max(covidA_subset$Death)
+death_med = median(covidA_subset$Death)
+```
+
+```{r, echo=FALSE, message=FALSE, warning = FALSE, comment=NA, fig.height=4, fig.width=8}
+
+xplot <- ggdensity(covidA_subset, "Death", fill = "State",
+                   palette = "ggplot2")+clean_theme()+ggtitle("Density Plot for Death by State")
+
+xplot
+```
+
+
+
+| States      | Mean    | Median  | Std Dev | Min     | Max     |
+|-------------|---------|---------|---------|---------|---------|
+| Maryland    | `r ML_avg`  | `r ML_med`  | `r ML_sd`   | `r ML_min`  | `r ML_max`  |
+| California  | `r CAL_avg` | `r CAL_med` | `r CAL_sd`  | `r CAL_min` | `r CAL_max` |
+| Hawaii      | `r HA_avg`  | `r HA_med`  | `r HA_sd`   | `r HA_min`  | `r HA_max`  |
+| Mississippi | `r MIS_avg` | `r MIS_med` | `r MIS_sd`  | `r MIS_min` | `r MIS_max` |
+|       |     |   |   |      |      |
+|Number of Death |
+|       | Mean    | Median  | Std Dev | Min     | Max     |
+|-------------|---------|---------|---------|---------|---------|
+|Death        | `r death_avg` | `r death_med` | `r death_sd` | `r death_min` | `r death_max` |
+Table 1. From the subset, we suspect that states do have an affect on the rate of deaths due to Covid-19 within their state border.
+
+
+
+The objective of this report is to make a detailed comparison on the number of deaths among the four states: Maryland, California, Hawaii, and Mississippi, and observe if there is a significant different in the death rates by Covid-19 between the four states. Since we want to observe if there is a significant different in the distributions of deaths by Covid-19 among the four states, we will be using K-sample permutation F-test to observe if the distributions are different. In addition, since there are outliers within the data, we will als be using the Kruskal-Wallis Test to allievate the presence of outliers within our sample data. Finally, if the tests confirm that there is a signficant different in distribution, we will be doing multiple comparisons between the groups and calculating the Bonferroni and Tukey's cutoff values to determine which groups are significantly different.   
+
+#3 Analysis
+
+First, we will be performing a K-sample permutation F-test with R=3000 
+
+
+```{r, echo=FALSE}
+covidA_subset$Rank = rank(covidA_subset$Death, ties = "average")
+Group.order = aggregate(Death ~ State, data = covidA_subset, mean)$State
+Xi = aggregate(Death ~ State, data = covidA_subset, mean)$Death
+si = aggregate(Death ~ State, data = covidA_subset, sd)$Death
+Ri = aggregate(Rank ~ State, data = covidA_subset, mean)$Rank
+ni = aggregate(Death ~ State, data = covidA_subset, length)$Death
+results = rbind(Xi,si,Ri,ni)
+rownames(results) = c("State Mean","State SD","Rank Mean","Sample Size")
+colnames(results) = as.character(Group.order)
+#results
+
+SR.2 = var(covidA_subset$Rank)
+N = nrow(covidA_subset)
+K = length(unique(covidA_subset$State))
+KW.OBS = 1/SR.2*sum(ni*(Ri - (N+1)/2)^2)
+p.value = pchisq(KW.OBS, df = K-1,lower.tail = FALSE)
+```
+
+Hypothesis:
+
+$F_{CA}(x)$ : Distribution for California
+
+$F_{MD}(x)$ : Distribution for Maryland
+
+$F_{HI}(x)$ : Distribution for Hawaii
+
+$F_{MS}(x)$ : Distribution for Mississippi
+
+
+$H_O: F_{CA}(x) = F_{MD}(x) = F_{HI}(x) = F_{MS}(x)$  vs. $H_a: F_i(x) \geq F_j(x)$ or $H_a: F_i(x) \leq F_j(x)$
+
+```{r, echo=FALSE}
+#Permutation Test
+
+F.OBS = summary(lm(Death ~ State, data = covidA_subset))$fstatistic["value"]
+
+permuted.data = covidA_subset #So we don't overwrite the original data
+permuted.data$State = sample(permuted.data$State, nrow(permuted.data), replace = FALSE) #Permuting the groups
+Fi = summary(lm(Death ~ State, data = permuted.data))$fstatistic["value"]
+
+R = 3000
+many.perms = sapply(1:R,function(i){
+  permuted.data = covidA_subset #So we don't overwrite the original data
+  permuted.data$State = sample(permuted.data$State, nrow(permuted.data), replace = FALSE) #Permuting the groups
+  Fi = summary(lm(Death ~ State, data = permuted.data))$fstatistic["value"]
+  return(Fi)
+})
+
+#hist(many.perms, main = "Distribution for Permuted F values",xlab = "Fi")
+#points(y = 0, x = F.OBS, col = "purple",pch = 17)
+
+perm_pval <- mean(many.perms >= F.OBS)
+```
+
+```{r, echo=FALSE}
+KW.OBS = 1/SR.2*sum(ni*(Ri - (N+1)/2)^2) #Note, this assumes you calculate ni and Ri above
+R = 3000
+many.perms.KW = sapply(1:R,function(i){
+  permuted.data = covidA_subset #So we don't overwrite the original data
+  permuted.data$State = sample(permuted.data$State, nrow(permuted.data), replace = FALSE) #Permuting the groups
+  SR.2 = var(permuted.data$Rank)
+  ni = aggregate(Rank ~ State, data = permuted.data,length)$Rank
+  Ri = aggregate(Rank ~ State, data = permuted.data,mean)$Rank
+  KW.i= 1/SR.2*sum(ni*(Ri - (N+1)/2)^2) 
+  return(KW.i)
+})
+kw_pval = mean(many.perms.KW > KW.OBS)
+```
+
+
+###Permutation test and Kruskal-Wallis Test Table 
+|                     | Test-Statistics    | P-values      |
+|---------------------|------------|---------------|
+| Permutation F-Test  | 2.169135 | 0.05033333 |
+| Kruskal-Wallis Test | 9.717647 | 0.006666667   |
+Table 2: P-values and Test-Statistics for the Permutation and Kruskal-Wallis Tests. We have choosen $\alpha = 0.05$ to test against the hypothesis.
+
+```{r, echo=FALSE}
+#find which groups are different
+
+all.diff = as.numeric(dist(Ri,method = "manhattan"))
+names(all.diff) = c("California vs Hawaii","California vs Maryland","California vs Mississippi", "Hawaii vs Maryland", "Hawaii vs Mississippi", "Maryland vs Mississippi")
+```
+
+```{r, echo=FALSE}
+library(coin)
+K = length(unique(covidA_subset$State))
+alpha = 0.05
+g = K*(K-1)/2
+z.a =  qnorm(1-alpha/(2*g))
+
+BON12 = qnorm(1-alpha/(2*g))*sqrt(SR.2*(1/ni[1] + 1/ni[2]))
+BON13 = qnorm(1-alpha/(2*g))*sqrt(SR.2*(1/ni[1] + 1/ni[3]))
+BON14 = qnorm(1-alpha/(2*g))*sqrt(SR.2*(1/ni[1] + 1/ni[4]))
+BON23 = qnorm(1-alpha/(2*g))*sqrt(SR.2*(1/ni[2] + 1/ni[3]))
+BON24 = qnorm(1-alpha/(2*g))*sqrt(SR.2*(1/ni[2] + 1/ni[4]))
+BON34 = qnorm(1-alpha/(2*g))*sqrt(SR.2*(1/ni[3] + 1/ni[4]))
+all.BON = c(BON12, BON13, BON14, BON23, BON24, BON34)
+
+split.groups = split(covidA_subset,covidA_subset$State) 
+IvsII = rbind(split.groups[[1]],split.groups[[2]]) 
+IvsIII = rbind(split.groups[[1]],split.groups[[3]]) 
+IvsIV = rbind(split.groups[[1]],split.groups[[4]])
+IIvsIII = rbind(split.groups[[2]],split.groups[[3]]) 
+IIvsIV = rbind(split.groups[[2]],split.groups[[4]]) 
+IIIvsIV = rbind(split.groups[[3]],split.groups[[4]])
+
+IvsII$State <- as.factor(IvsII$State)
+IvsIII$State <- as.factor(IvsIII$State)
+IvsIV$State <- as.factor(IvsIV$State)
+IIvsIII$State <- as.factor(IIvsIII$State)
+IIvsIV$State <- as.factor(IIvsIV$State)
+IIIvsIV$State <- as.factor(IIIvsIV$State)
+
+#wilcox_test(Death ~ State, data = IvsII,distribution = "exact")
+#wilcox_test(Death ~ State, data = IvsIII,distribution = "exact")
+#wilcox_test(Death ~ State, data = IvsIV,distribution = "exact")
+#wilcox_test(Death ~ State, data = IIvsIII,distribution = "exact")
+#wilcox_test(Death ~ State, data = IIvsIV,distribution = "exact")
+#wilcox_test(Death ~ State, data = IIIvsIV,distribution = "exact")
+
+```
+
+```{r, echo=FALSE}
+HSD12 = qtukey(1-alpha,K,N-K)*sqrt((SR.2/2)*(1/ni[1] + 1/ni[2]))
+HSD13 = qtukey(1-alpha,K,N-K)*sqrt((SR.2/2)*(1/ni[1] + 1/ni[3]))
+HSD14 = qtukey(1-alpha,K,N-K)*sqrt((SR.2/2)*(1/ni[1] + 1/ni[4]))
+HSD23 = qtukey(1-alpha,K,N-K)*sqrt((SR.2/2)*(1/ni[2] + 1/ni[3]))
+HSD24 = qtukey(1-alpha,K,N-K)*sqrt((SR.2/2)*(1/ni[2] + 1/ni[4]))
+HSD34 = qtukey(1-alpha,K,N-K)*sqrt((SR.2/2)*(1/ni[3] + 1/ni[4]))
+all.HSD = c(HSD12,HSD13,HSD14, HSD23, HSD24, HSD34)
+
+alpha =0.05
+R = 3000
+R.perms = sapply(1:R,function(i){
+  permute.data =  covidA_subset
+  permute.data$State = sample(permute.data$State,length(permute.data$State),replace = FALSE)
+  Ri = round(aggregate(Death ~ State, data = permute.data, mean)$Death,2)
+  all.Tij = all.diff = as.numeric(dist(Ri,method = "manhattan"))
+  max.diff = max(all.Tij)
+  return(max.diff)
+})
+tukey.cutoff = quantile(R.perms,1-0.05)
+
+```
+
+```{r, echo=FALSE}
+all.crits = rbind(all.diff, all.BON,all.HSD)
+
+```
+
+###Simultaneous Inference Table
+
+|          | California vs Hawaii | California vs Maryland | California vs Mississippi | Hawaii vs Maryland | Hawaii vs Mississippi | Maryland vs Mississippi |
+|----------|----------------------|------------------------|---------------------------|--------------------|-----------------------|-------------------------|
+| all.diff | 10.500000            | 4.900000               | 5.50000                   | 5.600000           | 5.000000              | 0.600000                |
+| all.BON  | 8.937036             | 8.937036               | 10.17526                  | 8.425918           | 9.729412              | 9.729412                |
+| all.HSD  | 9.942603             | 9.942603               | 11.32015                  | 9.373976           | 10.824135             | 10.824135               |
+Table 3: Multiple Comparisons between States, $\alpha = 0.05$ is choosen to calculate the critical values of BON and HSD
+
+
+Hypothesis:
+$H_O: \mu_{i,j} = 0$
+
+$H_A: \mu_{i,j} =/= 0$
+
+
+###Permutation Bonferroni Correction Values Table
+
+|         | California vs Hawaii | California vs Maryland | California vs Mississippi | Hawaii vs Maryland | Hawaii vs Mississippi | Maryland vs Mississippi |
+|---------|----------------------|------------------------|---------------------------|--------------------|-----------------------|-------------------------|
+| test-statistics | 2.4495               | 1.9596                 | -1.4142                   | -2.1934            | -1.3416               | 0.14907                 |
+| P-value | 0.01587              | 0.06349                | 0.2286                    | 0.03175            | 0.25                  | 1                       |
+Table 4: Bonferroni Adjustment was used to reduce the overall error rate when doing multiple comparisons test. 
+
+# Code Appendix 
+```{r, ref.label=knitr::all_labels(),echo=TRUE,eval=FALSE}
+# this is the code appendix 
+```
+
